@@ -449,9 +449,9 @@ public class MessageView extends K9Activity implements OnClickListener {
         mPrevious.setEnabled(mPreviousMessage != null);
         // If moving isn't support at all, then all of them must be disabled anyway.
         if (mController.isMoveCapable(mAccount)) {
-            // Only enable the button if the Archive folder is not the current folder and not NONE.
+            // Only enable the button if they have an archive folder and it's not the current folder.
             mArchive.setEnabled(!mMessageReference.folderName.equals(mAccount.getArchiveFolderName()) &&
-                                !K9.FOLDER_NONE.equalsIgnoreCase(mAccount.getArchiveFolderName()));
+                                mAccount.hasArchiveFolder());
             // Only enable the button if the Spam folder is not the current folder and not NONE.
             mSpam.setEnabled(!mMessageReference.folderName.equals(mAccount.getSpamFolderName()) &&
                              !K9.FOLDER_NONE.equalsIgnoreCase(mAccount.getSpamFolderName()));
@@ -878,7 +878,7 @@ public class MessageView extends K9Activity implements OnClickListener {
             menu.findItem(R.id.archive).setVisible(false);
             menu.findItem(R.id.spam).setVisible(false);
         }
-        if (K9.FOLDER_NONE.equalsIgnoreCase(mAccount.getArchiveFolderName())) {
+        if (!mAccount.hasArchiveFolder()) {
             menu.findItem(R.id.archive).setVisible(false);
         }
         if (K9.FOLDER_NONE.equalsIgnoreCase(mAccount.getSpamFolderName())) {
@@ -980,7 +980,8 @@ public class MessageView extends K9Activity implements OnClickListener {
                 public void run() {
                     if (!clonedMessage.isSet(Flag.X_DOWNLOADED_FULL) &&
                             !clonedMessage.isSet(Flag.X_DOWNLOADED_PARTIAL)) {
-                        mMessageView.loadBodyFromUrl("file:///android_asset/downloading.html");
+                        String text = getString(R.string.message_view_downloading);
+                        mMessageView.showStatusMessage(text);
                     }
                     mMessageView.setHeaders(clonedMessage, account);
                     mMessageView.setOnFlagListener(new OnClickListener() {
@@ -1033,7 +1034,7 @@ public class MessageView extends K9Activity implements OnClickListener {
                     }
                     if ((MessageView.this.mMessage == null) ||
                     !MessageView.this.mMessage.isSet(Flag.X_DOWNLOADED_PARTIAL)) {
-                        mMessageView.loadBodyFromUrl("file:///android_asset/empty.html");
+                        mMessageView.showStatusMessage(getString(R.string.webview_empty_message));
                     }
                 }
             });
